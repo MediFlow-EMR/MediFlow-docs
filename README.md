@@ -398,6 +398,6 @@ CREATE INDEX idx_vital_good ON vital_sign(
 - [5. 데이터베이스 설계](5.DATABASE_DESIGN.md)
 - [6. API 문서](6.API_DOCUMENTATION.md)
 - [7. 향후 업데이트 계획](7.ROADMAP.md)
-- [8. 법적 고려사항](8.LEGAL_COMPLIANCE.md.md)
+- [8. 법적 고려사항](8.LEGAL_COMPLIANCE.md)
 
 ---
