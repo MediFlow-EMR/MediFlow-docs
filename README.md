@@ -6,7 +6,7 @@
 - 담당·전체 환자는 이름/환자번호/진단·병실·알레르기·낙상·격리, 간호기록은 내용·기간·카테고리·작성자·중요 여부로 필터링합니다. 인수인계는 내용/작성자·기간·근무조·수기/AI·상태를 필터링합니다. 필터는 조회된 목록에 클라이언트에서 적용합니다.
 - 수기·AI 초안을 서버에 임시저장하고 다시 열어 수정·승인합니다. 승인 후 작성자 수정도 가능하며 원본 AI와 수정본, 버전별 스냅샷을 보존합니다. 초안은 작성자 전용, 승인본·이력은 같은 부서 조회입니다.
 - 운영 배포는 Flyway 마이그레이션 → Hibernate validate → 건강 상태 확인 순서입니다. 기존 DB의 최초 기준선 등록·백업·실패 대응은 저장소 `deploy/database/README.md`를 따릅니다. 기존 MariaDB를 보존하는 로컬 실행은 `local` 프로필입니다.
-- 최신 API는 저장소 `swagger.yaml` 1.3.1, DB 개요는 `assets/db.png`입니다. 소개 GIF는 2026.10.11 현재 UI 기준입니다. 설계 개념 그림의 후속 기능은 구현 범위와 구분해서 확인하세요.
+- 최신 API는 저장소 `swagger.yaml` 1.3.2, DB 개요는 `assets/db.png`입니다. 소개 GIF는 2026.10.11 현재 UI 기준입니다. 설계 개념 그림의 후속 기능은 구현 범위와 구분해서 확인하세요.
 
 > 간호사의 실무 경험을 기반으로, 기존 EMR/OCS 위에서 입원환자 상태 확인과 근무조 인수인계를 지원하는 포트폴리오용 PoC
 
@@ -408,12 +408,12 @@ CREATE INDEX idx_vital_good ON vital_sign(
 
 2026.10.11 로컬 가상 계정의 실제 브라우저 조작 화면을 캡처한 GIF입니다. 로그인, 다중 필터, 날짜 정렬, 수기·AI 초안 저장과 승인 후 수정 이력을 보여줍니다.
 
-![로그인과 테마 전환](assets/demos/login.gif)
+![이메일 로그인과 데모 체험](assets/demos/login.gif)
 
-![환자 조회와 다중 병실 필터](assets/demos/patientdashboard.gif)
+![담당·부서 환자와 날짜·근무조 전환](assets/demos/patientdashboard.gif)
 
-![간호기록·날짜·다중 카테고리](assets/demos/nursingrecord.gif)
+![간호기록 다중 카테고리 필터](assets/demos/nursingrecord.gif)
 
-![오더·약품 정보·투약 입력](assets/demos/ordertab.gif)
+![오더 날짜 정렬과 약품 정보 조회](assets/demos/ordertab.gif)
 
-![수기·AI 초안·승인·수정 이력](assets/demos/aihandover.gif)
+![AI 초안 편집·미저장 보호·승인 기록 이력](assets/demos/aihandover.gif)
