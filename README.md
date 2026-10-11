@@ -1,12 +1,26 @@
-# MediFlow EMR
+# MediFlow — 병동 간호·인수인계 EMR 연계 모듈
 
-> 간호사의 실무 경험을 기반으로 설계된 차세대 전자의무기록 시스템
+## 현재 구현 상태 (2026-10-11)
 
-**MediFlow**는 간호사의 업무 효율을 극대화하기 위해 **환자 정보 통합 대시보드**와 **AI 기반 인수인계 자동화**를 핵심으로 구현한 EMR 시스템입니다.
+- 랜딩·로그인·메인·상세 화면은 라이트 기본값의 저장형 다크모드를 제공합니다. 데스크톱 가로형 배치를 유지하고 작은 화면의 일부 세로 배치, 버튼 줄바꿈 방지, 공통 포커스·움직임과 reduced-motion을 적용했습니다.
+- 담당·전체 환자는 이름/환자번호/진단·병실·알레르기·낙상·격리, 간호기록은 내용·기간·카테고리·작성자·중요 여부로 필터링합니다. 인수인계는 내용/작성자·기간·근무조·수기/AI·상태를 필터링합니다. 필터는 조회된 목록에 클라이언트에서 적용합니다.
+- 수기·AI 초안을 서버에 임시저장하고 다시 열어 수정·승인합니다. 승인 후 작성자 수정도 가능하며 원본 AI와 수정본, 버전별 스냅샷을 보존합니다. 초안은 작성자 전용, 승인본·이력은 같은 부서 조회입니다.
+- 운영 배포는 Flyway 마이그레이션 → Hibernate validate → 건강 상태 확인 순서입니다. 기존 DB의 최초 기준선 등록·백업·실패 대응은 저장소 `deploy/database/README.md`를 따릅니다. 기존 MariaDB를 보존하는 로컬 실행은 `local` 프로필입니다.
+- 최신 API는 저장소 `swagger.yaml` 1.3.0, DB 개요는 `assets/db.png`입니다. 소개 GIF는 2026.10.11 현재 UI 기준입니다. 설계 개념 그림의 후속 기능은 구현 범위와 구분해서 확인하세요.
+
+> 간호사의 실무 경험을 기반으로, 기존 EMR/OCS 위에서 입원환자 상태 확인과 근무조 인수인계를 지원하는 포트폴리오용 PoC
+
+**MediFlow**는 병원 전체 업무를 대체하는 완제품 EMR이 아닙니다. 담당 환자의 오더·바이탈·I/O·투약·검사·간호기록을 모아 보여주고, 근무조 기록으로부터 AI 인수인계 초안을 생성하는 병동 간호 모듈입니다. 모든 데이터는 가상이며 전자의무기록시스템 인증을 취득한 제품이 아닙니다.
+
+### 현재 검증 중인 핵심 가설
+
+- 분산된 임상정보를 환자 안전정보와 함께 배치하면 상태 파악 시간을 줄일 수 있는가
+- 근무조 기록을 구조화하면 누락이 적은 인수인계 초안을 만들 수 있는가
+- 외부 AI에 환자 식별정보를 보내지 않고도 유용한 초안을 생성할 수 있는가
 
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI_Model-8E75B2?logo=google&logoColor=white) 
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.6-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![React](https://img.shields.io/badge/React-19.2.3-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![MariaDB](https://img.shields.io/badge/MariaDB-10.11-003545?logo=mariadb&logoColor=white)](https://mariadb.org)
 [![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?logo=amazonaws&logoColor=white)](https://aws.amazon.com)
 
@@ -36,13 +50,13 @@
 | 문제 영역 | 기존 방식 | MediFlow 솔루션 | 기술적 구현 |
 |---------|----------|----------------|-----------|
 | **정보 조회** | 다중 페이지 이동 (5+ 클릭) | One-View 통합 대시보드 | React 컴포넌트 모듈화 + 실시간 데이터 aggregation |
-| **인수인계** | 수기 작성 + 구두 전달 | AI 자동 요약 생성 | Gemini API 활용한 의료 기록 요약 파이프라인 |
+| **인수인계** | 수기 작성 + 구두 전달 | 수기·AI 초안 임시저장·수정·승인 | Gemini API 활용한 의료 기록 요약 파이프라인 |
 | **신규 간호사 적응** | 별도 교육 필요 | 직관적 UI/UX | 간호 업무 플로우 기반 정보 아키텍처 설계 |
 
 ### 프로젝트 정보
 
-- **개발 기간**: 7일 (기획 1일 + 개발 4일 + 배포 2일)
 - **개발 인원**: 1인 (Full-stack)
+- **현재 단계**: 병동 간호 업무 흐름을 검증하는 PoC
 - **배포 URL**:
   - Frontend: `https://mediflow-emr.cloud`
   - Backend API: `https://api.mediflow-emr.cloud`
@@ -184,10 +198,10 @@ CREATE INDEX idx_vital_good ON vital_sign(
 
 | 기술 | 버전 | 용도 |
 |-----|------|------|
-| ![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black) | 19.1.1 | UI 컴포넌트 라이브러리 |
-| ![Vite](https://img.shields.io/badge/Vite-7.1.2-646CFF?logo=vite&logoColor=white) | 7.1.2 | 빌드 도구 (HMR 지원) |
+| ![React](https://img.shields.io/badge/React-19.2.3-61DAFB?logo=react&logoColor=black) | 19.2.3 | UI 컴포넌트 라이브러리 |
+| ![Vite](https://img.shields.io/badge/Vite-7.3.7-646CFF?logo=vite&logoColor=white) | 7.3.7 | 빌드 도구 (HMR 지원) |
 | ![Zustand](https://img.shields.io/badge/Zustand-5.0.8-443E38) | 5.0.8 | 경량 상태 관리 |
-| ![Axios](https://img.shields.io/badge/Axios-1.13.2-5A29E4?logo=axios&logoColor=white) | 1.13.2 | HTTP 클라이언트 |
+| ![Axios](https://img.shields.io/badge/Axios-1.20.0-5A29E4?logo=axios&logoColor=white) | 1.20.0 | HTTP 클라이언트 |
 | ![Recharts](https://img.shields.io/badge/Recharts-3.5.0-22B5BF) | 3.5.0 | 바이탈 사인 시계열 차트 |
 
 ### Backend
@@ -386,3 +400,20 @@ CREATE INDEX idx_vital_good ON vital_sign(
 - [8. 법적 고려사항](8.LEGAL_COMPLIANCE.md)
 
 ---
+
+
+최종 UI·정렬·저장 안정성 변경과 재현 가능한 검증 결과는 [품질 검증 기록](10.QUALITY_AND_VALIDATION.md)에 정리했습니다.
+
+## 현재 UI 시연
+
+2026.10.11 로컬 가상 계정의 실제 브라우저 조작 화면을 캡처한 GIF입니다. 로그인, 다중 필터, 날짜 정렬, 수기·AI 초안 저장과 승인 후 수정 이력을 보여줍니다.
+
+![로그인과 테마 전환](assets/demos/login.gif)
+
+![환자 조회와 다중 병실 필터](assets/demos/patientdashboard.gif)
+
+![간호기록·날짜·다중 카테고리](assets/demos/nursingrecord.gif)
+
+![오더·약품 정보·투약 입력](assets/demos/ordertab.gif)
+
+![수기·AI 초안·승인·수정 이력](assets/demos/aihandover.gif)
